@@ -28,19 +28,20 @@ const show = (req, res) => {
   };
 
   const create = (req, res) => {
-    const {joke_text, tomato} = req.body;
-    let sql = `INSERT INTO ?? VALUES (?, ?, ?)`;
-    let replacements = [ "jokes", null, joke_text, tomato];
-    sql = mysql.format(sql, replacements);
-    pool.query(sql, (err, row) => {
+    const { joke_text, tomato } = req.body;
+  
+    pool.query(
+      `INSERT INTO jokes (joke_text, tomato) 
+        VALUES ("${joke_text}","${tomato}")`,
+      (err, row) => {
         if (err) {
-          console.error(err);
-          return res.status(500).send("Hey! Something happened.");
+          console.log({ message: "Error occurred: " + err });
+          return res.status(500).send("An unexpected error occurred");
         }
         res.json(row);
-      });
-    };
-
+      }
+    );
+  };
     const update = (req, res) => {
       const { id } = req.params;
       const { body } = req;
