@@ -2,7 +2,7 @@ const mysql = require('mysql');
 const pool = require("../sql");
 
 const list = (req, res) => {
-    let sql = `SELECT * FROM ??`;
+    let sql = `SELECT * FROM jokes`;
     sql = mysql.format(sql, ["jokes"]);
     pool.query(sql, (err, rows) => {
       if (err) {
@@ -14,18 +14,17 @@ const list = (req, res) => {
   };
 
 const show = (req, res) => {
-    const { id } = req.params;
-    let sql = `SELECT * FROM ?? WHERE ?? = ?`;
-    let replacements = ["jokes", "id", id];
-    sql = mysql.format(sql, replacements);
-    pool.query(sql, (err, row) => {
+  pool.query(
+    `SELECT * FROM jokes WHERE id = ${req.params.id}`,
+    (err, row) => {
       if (err) {
-        console.error(err);
-        return res.status(500).send("Hey! Something happened.");
+        console.log({ message: "Error occurred: " + err });
+        return res.status(500).send("An unexpected error occurred");
       }
       res.json(row);
-    });
-  };
+    }
+  );
+};
 
   const create = (req, res) => {
     const { joke_text, tomato } = req.body;
@@ -42,31 +41,29 @@ const show = (req, res) => {
       }
     );
   };
-    const update = (req, res) => {
-      const { id } = req.params;
-      const { body } = req;
-      let sql = `UPDATE ?? SET ? WHERE id = ?`
-      sql = mysql.format(sql, ["jokes", body, id]);
-      pool.query(sql, (err, row) => {
-          if (err) {
-            console.error(err);
-            return res.status(500).send("Hey! Something happened.");
-          }
-          res.json(row.message);
-        });
-      };
+  const update = (req, res) => {
+    let sql = "UPDATE ?? SET ? WHERE ?? = ?";
+    sql = mysql.format(sql, ["customers", req.body, "id", req.params.id]);
+    pool.query(sql, (err, row) => {
+      if (err) {
+        console.log({ message: "Error occurred: " + err });
+        return res.status(500).send("An unexpected error occurred");
+      }
+      res.json(row);
+    });
+  };
 
-const remove = (req, res) => {
-        const { id } = req.params;
-        let sql = `DELETE FROM ?? WHERE ?? = ?`
-        sql = mysql.format(sql, ["jokes", "id", id]);
-        pool.query(sql, (err, row) => {
+      const remove = (req, res) => {
+        pool.query(
+          `DELETE FROM jokes WHERE id = ${req.params.id}`,
+          (err, row) => {
             if (err) {
-              console.error(err);
-              return res.status(500).send("Hey! Something happened.");
+              console.log({ message: "Error occurred: " + err });
+              return res.status(500).send("An unexpected error occurred");
             }
-            res.json(row.affectedRows);
-          });
-        };
+            res.json(row);
+          }
+        );
+      };
 
   module.exports = { list, show, create, update, remove  };
